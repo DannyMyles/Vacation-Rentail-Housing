@@ -19,21 +19,24 @@ import { usePathname, useRouter } from "next/navigation";
 import { Amenities_demos, PHOTOS } from "./constant";
 import StayDatesRangeInput from "./StayDatesRangeInput";
 import GuestsInput from "./GuestsInput";
-import SectionDateRange from "../SectionDateRange";
 import { Route } from "next";
 import axios from "axios";
-export interface ListingStayDetailPageProps {}
+export interface ListingStayDetailPageProps {
+  params: {
+    hotelId: number;
+  };
+}
 import { HomepageDetails, HotelDetails } from "@/data/types";
-const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
-
-  const [hotelPhotos, setHotelPhotos] = useState<HomepageDetails[]>([])
+import SectionDateRange from "../../SectionDateRange";
+const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
+  const [hotelPhotos, setHotelPhotos] = useState<HomepageDetails[]>([]);
 
   async function gethotelPhotos() {
     const options = {
       method: "GET",
       url: "https://apidojo-booking-v1.p.rapidapi.com/properties/get-hotel-photos",
       params: {
-        hotel_ids: "1950932",
+        hotel_ids: `${params.hotelId}`,
       },
       headers: {
         "X-RapidAPI-Key": "bed8d8672fmshba4b60b4b95db60p1cf23djsnf009a4d70736",
@@ -51,7 +54,6 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
   }
 
   useEffect(() => {
-    // console.log("stayId ", stayId);
     gethotelPhotos();
   }, []);
 
@@ -69,7 +71,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
   }
 
   const handleOpenModalImageGallery = () => {
-    router.push(`${thisPathname}/?modal=PHOTO_TOUR_SCROLLABLE` as Route);
+    router.push(
+      `${thisPathname}/?modal=PHOTO_TOUR_SCROLLABLE&hotel_id=${params.hotelId}` as Route
+    );
   };
 
   const renderSection1 = () => {
