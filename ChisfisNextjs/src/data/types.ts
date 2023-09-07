@@ -141,3 +141,56 @@ export interface CarDataType {
     lng: number;
   };
 }
+
+
+export interface PropertyList {
+  arrival_date: string;
+  departure_date: string;
+  room_qty: string;
+  guest_qty: string;
+  bbox: string;
+  search_id: string;
+  children_age: string;
+  price_filter_currencycode: string;
+  categories_filter: string;
+  languagecode: string;
+  travel_purpose: string;
+  children_qty: string;
+  order_by: string;
+}
+
+export interface CardDataType {
+  id: string;
+  main_photo_url: string;
+  hotel_name:string;
+  address:string;
+  review_score:number;
+  review_nr:number;
+  main_total_price:number;
+}
+
+export interface HotelDetails {
+  data: {
+    [key : string]: HomepageDetails[];
+  }
+}
+
+export interface HomepageDetails {
+  "0": number;
+  "1": {
+    confidence: number;
+    photo_id: number;
+    tag_id: number;
+    tag_name: null | string;
+    tag_type: string;
+  }[];
+  "2": number
+  "3":{tag: String, id: number}[];
+  "4": string;
+  "5": string;
+  "6": string;
+  "7": string;
+}
+
+
+

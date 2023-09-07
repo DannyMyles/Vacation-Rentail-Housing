@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { DEMO_STAY_LISTINGS } from "@/data/listings";
-import { StayDataType } from "@/data/types";
+import { StayDataType, CardDataType } from "@/data/types";
 import StartRating from "@/components/StartRating";
 import BtnLikeIcon from "@/components/BtnLikeIcon";
 import SaleOffBadge from "@/components/SaleOffBadge";
@@ -37,6 +37,14 @@ const StayCard: FC<StayCardProps> = ({
     id,
   } = data;
 
+  // const { main_photo_url,
+  //   hotel_name, 
+  //   address, 
+  //   review_score,
+  //   review_nr,
+  //   main_total_price } =  data;
+  //   const galleryImgs = [main_photo_url];
+  //   const href = main_photo_url
   const renderSliderGallery = () => {
     return (
       <div className="relative w-full">
