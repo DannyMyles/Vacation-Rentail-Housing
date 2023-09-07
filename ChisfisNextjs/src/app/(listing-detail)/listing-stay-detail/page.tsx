@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, Fragment, useState } from "react";
+import React, { FC, Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowRightIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import CommentListing from "@/components/CommentListing";
@@ -21,11 +21,39 @@ import StayDatesRangeInput from "./StayDatesRangeInput";
 import GuestsInput from "./GuestsInput";
 import SectionDateRange from "../SectionDateRange";
 import { Route } from "next";
-
+import axios from "axios";
 export interface ListingStayDetailPageProps {}
-
+import { HomepageDetails, HotelDetails } from "@/data/types";
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
-  //
+
+  const [hotelPhotos, setHotelPhotos] = useState<HomepageDetails[]>([])
+
+  async function gethotelPhotos() {
+    const options = {
+      method: "GET",
+      url: "https://apidojo-booking-v1.p.rapidapi.com/properties/get-hotel-photos",
+      params: {
+        hotel_ids: "1950932",
+      },
+      headers: {
+        "X-RapidAPI-Key": "bed8d8672fmshba4b60b4b95db60p1cf23djsnf009a4d70736",
+        "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
+      },
+    };
+    try {
+      const response = await axios.request<HotelDetails>(options);
+      const key: string = Object.keys(response.data.data)[0] as string;
+      setHotelPhotos(response.data.data[key]);
+      console.log("responsedata", response.data.data[key]);
+    } catch (error) {
+      console.log("error fetching hotelPhots", error);
+    }
+  }
+
+  useEffect(() => {
+    // console.log("stayId ", stayId);
+    gethotelPhotos();
+  }, []);
 
   let [isOpenModalAmenities, setIsOpenModalAmenities] = useState(false);
 
@@ -46,70 +74,86 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
 
   const renderSection1 = () => {
     return (
-      <div className="listingSection__wrap !space-y-6">
-        {/* 1 */}
-        <div className="flex justify-between items-center">
-          <Badge name="Wooden house" />
-          <LikeSaveBtns />
-        </div>
-
-        {/* 2 */}
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
-          Beach House in Collingwood
-        </h2>
-
-        {/* 3 */}
-        <div className="flex items-center space-x-4">
-          <StartRating />
-          <span>·</span>
-          <span>
-            <i className="las la-map-marker-alt"></i>
-            <span className="ml-1"> Tokyo, Jappan</span>
-          </span>
-        </div>
-
-        {/* 4 */}
-        <div className="flex items-center">
-          <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" />
-          <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
-            Hosted by{" "}
-            <span className="text-neutral-900 dark:text-neutral-200 font-medium">
-              Kevin Francis
-            </span>
-          </span>
-        </div>
-
-        {/* 5 */}
-        <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
-
-        {/* 6 */}
-        <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
-          <div className="flex items-center space-x-3 ">
-            <i className=" las la-user text-2xl "></i>
-            <span className="">
-              6 <span className="hidden sm:inline-block">guests</span>
-            </span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className=" las la-bed text-2xl"></i>
-            <span className=" ">
-              6 <span className="hidden sm:inline-block">beds</span>
-            </span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className=" las la-bath text-2xl"></i>
-            <span className=" ">
-              3 <span className="hidden sm:inline-block">baths</span>
-            </span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <i className=" las la-door-open text-2xl"></i>
-            <span className=" ">
-              2 <span className="hidden sm:inline-block">bedrooms</span>
-            </span>
-          </div>
-        </div>
+      <div>
+        {/* {
+          hotelPhotos.map(photos =>(
+            <div key={photos['0']}>
+              <p>
+                <Image
+                  src={photos['5']}
+                  width={200}
+                  height={200}
+                  alt="hotel photo"
+                />
+              </p>
+            </div>
+          ))
+        } */}
       </div>
+      // <div className="listingSection__wrap !space-y-6">
+      //   {/* 1 */}
+      //   <div className="flex justify-between items-center">
+      //     <Badge name="Wooden house" />
+      //     <LikeSaveBtns />
+      //   </div>
+
+      //   {/* 2 */}
+      //   <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
+      //     Beach House in Collingwood
+      //   </h2>
+
+      //   {/* 3 */}
+      //   <div className="flex items-center space-x-4">
+      //     <StartRating />
+      //     <span>·</span>
+      //     <span>
+      //       <i className="las la-map-marker-alt"></i>
+      //       <span className="ml-1"> Tokyo, Jappan</span>
+      //     </span>
+      //   </div>
+
+      //   {/* 4 */}
+      //   <div className="flex items-center">
+      //     <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" />
+      //     <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
+      //       Hosted by{" "}
+      //       <span className="text-neutral-900 dark:text-neutral-200 font-medium">
+      //         Kevin Francis
+      //       </span>
+      //     </span>
+      //   </div>
+
+      //   {/* 5 */}
+      //   <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
+
+      //   {/* 6 */}
+      //   <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
+      //     <div className="flex items-center space-x-3 ">
+      //       <i className=" las la-user text-2xl "></i>
+      //       <span className="">
+      //         6 <span className="hidden sm:inline-block">guests</span>
+      //       </span>
+      //     </div>
+      //     <div className="flex items-center space-x-3">
+      //       <i className=" las la-bed text-2xl"></i>
+      //       <span className=" ">
+      //         6 <span className="hidden sm:inline-block">beds</span>
+      //       </span>
+      //     </div>
+      //     <div className="flex items-center space-x-3">
+      //       <i className=" las la-bath text-2xl"></i>
+      //       <span className=" ">
+      //         3 <span className="hidden sm:inline-block">baths</span>
+      //       </span>
+      //     </div>
+      //     <div className="flex items-center space-x-3">
+      //       <i className=" las la-door-open text-2xl"></i>
+      //       <span className=" ">
+      //         2 <span className="hidden sm:inline-block">bedrooms</span>
+      //       </span>
+      //     </div>
+      //   </div>
+      // </div>
     );
   };
 
@@ -558,57 +602,61 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({}) => {
   return (
     <div className="nc-ListingStayDetailPage">
       {/*  HEADER */}
-      <header className="rounded-md sm:rounded-xl">
-        <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-          <div
-            className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden cursor-pointer"
-            onClick={handleOpenModalImageGallery}
-          >
-            <Image
-              fill
-              className="object-cover rounded-md sm:rounded-xl"
-              src={PHOTOS[0]}
-              alt=""
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
-            />
-            <div className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity"></div>
-          </div>
-          {PHOTOS.filter((_, i) => i >= 1 && i < 5).map((item, index) => (
+      {hotelPhotos && hotelPhotos.length > 0 && (
+        <header className="rounded-md sm:rounded-xl">
+          <div className="relative grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
             <div
-              key={index}
-              className={`relative rounded-md sm:rounded-xl overflow-hidden ${
-                index >= 3 ? "hidden sm:block" : ""
-              }`}
+              className="col-span-2 row-span-3 sm:row-span-2 relative rounded-md sm:rounded-xl overflow-hidden cursor-pointer"
+              onClick={handleOpenModalImageGallery}
             >
-              <div className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5">
-                <Image
-                  fill
-                  className="object-cover rounded-md sm:rounded-xl "
-                  src={item || ""}
-                  alt=""
-                  sizes="400px"
-                />
-              </div>
-
-              {/* OVERLAY */}
-              <div
-                className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                onClick={handleOpenModalImageGallery}
+              <Image
+                fill
+                className="object-cover rounded-md sm:rounded-xl"
+                src={`https://cf.bstatic.com${hotelPhotos[0]["4"]}`}
+                alt=""
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
               />
+              <div className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity"></div>
             </div>
-          ))}
+            {hotelPhotos
+              .filter((_, i) => i >= 1 && i < 5)
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className={`relative rounded-md sm:rounded-xl overflow-hidden ${
+                    index >= 3 ? "hidden sm:block" : ""
+                  }`}
+                >
+                  <div className="aspect-w-4 aspect-h-3 sm:aspect-w-6 sm:aspect-h-5">
+                    <Image
+                      fill
+                      className="object-cover rounded-md sm:rounded-xl "
+                      src={`https://cf.bstatic.com${item["6"]}`}
+                      alt=""
+                      sizes="400px"
+                    />
+                  </div>
 
-          <button
-            className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
-            onClick={handleOpenModalImageGallery}
-          >
-            <Squares2X2Icon className="w-5 h-5" />
-            <span className="ml-2 text-neutral-800 text-sm font-medium">
-              Show all photos
-            </span>
-          </button>
-        </div>
-      </header>
+                  {/* OVERLAY */}
+                  <div
+                    className="absolute inset-0 bg-neutral-900 bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={handleOpenModalImageGallery}
+                  />
+                </div>
+              ))}
+
+            <button
+              className="absolute hidden md:flex md:items-center md:justify-center left-3 bottom-3 px-4 py-2 rounded-xl bg-neutral-100 text-neutral-500 hover:bg-neutral-200 z-10"
+              onClick={handleOpenModalImageGallery}
+            >
+              <Squares2X2Icon className="w-5 h-5" />
+              <span className="ml-2 text-neutral-800 text-sm font-medium">
+                Show all photos
+              </span>
+            </button>
+          </div>
+        </header>
+      )}
 
       {/* MAIN */}
       <main className=" relative z-10 mt-11 flex flex-col lg:flex-row ">
