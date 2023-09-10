@@ -54,7 +54,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         method: "GET",
         url: "https://apidojo-booking-v1.p.rapidapi.com/properties/list-by-map",
         params: {
-          arrival_date: "2023-09-08",
+          arrival_date: "2023-09-15",
           departure_date: "2023-11-07",
           room_qty: "1",
           guest_qty: "1",
@@ -62,7 +62,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         },
         headers: {
           "X-RapidAPI-Key":
-            "bed8d8672fmshba4b60b4b95db60p1cf23djsnf009a4d70736",
+            "5b1750abd1msha9b6ba43a9d5ed2p12802cjsn324d1231e608",
           "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
         },
       };
@@ -89,7 +89,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
               "https://images.pexels.com/photos/5799379/pexels-photo-5799379.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
           },
           date: "May 20, 2021",
-          href: "/listing-stay-detail",
+          href: `/listing-stay-detail/${v.hotel_id}`,
           title: v.hotel_name,
           featuredImage: v.main_photo_url,
           commentCount: v.commentCount,

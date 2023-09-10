@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, Fragment, useState, useEffect } from "react";
+import React, { FC, Fragment, useState, useEffect, MouseEvent } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowRightIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import CommentListing from "@/components/CommentListing";
@@ -26,10 +26,19 @@ export interface ListingStayDetailPageProps {
     hotelId: number;
   };
 }
-import { HomepageDetails, HotelDetails } from "@/data/types";
+import {
+  HomepageDetails,
+  HotelPhotos,
+  HotelDetails,
+  HotelDetail,
+  Facility,
+} from "@/data/types";
 import SectionDateRange from "../../SectionDateRange";
 const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const [hotelPhotos, setHotelPhotos] = useState<HomepageDetails[]>([]);
+  const [hotelDetail, setHotelDetail] = useState<HotelDetail>();
+  const [hotelFacilities, setHotelFacilities] = useState<Facility[]>();
+  const [description, setDescription] = useState<string>();
 
   async function gethotelPhotos() {
     const options = {
@@ -39,12 +48,12 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         hotel_ids: `${params.hotelId}`,
       },
       headers: {
-        "X-RapidAPI-Key": "bed8d8672fmshba4b60b4b95db60p1cf23djsnf009a4d70736",
+        "X-RapidAPI-Key": "5b1750abd1msha9b6ba43a9d5ed2p12802cjsn324d1231e608",
         "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
       },
     };
     try {
-      const response = await axios.request<HotelDetails>(options);
+      const response = await axios.request<HotelPhotos>(options);
       const key: string = Object.keys(response.data.data)[0] as string;
       setHotelPhotos(response.data.data[key]);
       console.log("responsedata", response.data.data[key]);
@@ -55,6 +64,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
 
   useEffect(() => {
     gethotelPhotos();
+    fetchHotelDetals();
   }, []);
 
   let [isOpenModalAmenities, setIsOpenModalAmenities] = useState(false);
@@ -76,88 +86,116 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
     );
   };
 
+  const fetchHotelDetals = async () => {
+    console.log("first trial");
+    const options = {
+      method: "GET",
+      url: "https://apidojo-booking-v1.p.rapidapi.com/properties/detail",
+      params: {
+        hotel_id: params.hotelId,
+        arrival_date: "2023-09-18",
+        departure_date: "2023-11-09",
+        search_id: "",
+        rec_guest_qty: 2,
+        rec_room_qty: 1,
+      },
+      headers: {
+        "X-RapidAPI-Key": "5b1750abd1msha9b6ba43a9d5ed2p12802cjsn324d1231e608",
+        "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
+      },
+    };
+    try {
+      const response = await axios.request<any>(options);
+      // const key: string = Object.keys(response.data.data)[0] as string;
+      setHotelDetail(response.data[0] as HotelDetail);
+      let keys = hotelDetail ? Object.keys(hotelDetail.rooms) : [];
+      let key: string = Object.keys(response.data[0].rooms)[0] as string;
+      console.log(
+        "keys ",
+        key,
+        " facilities",
+        response.data[0]["rooms"][key]["facilities"]
+      );
+
+      setHotelFacilities(
+        response.data[0]["rooms"][key]["facilities"] as Facility[]
+      );
+      setDescription(response.data[0]["rooms"][key]["description"] as string);
+
+      console.log("getDetails", response.data[0], hotelFacilities);
+    } catch (error) {
+      console.log("error fetching details", error);
+    }
+  };
   const renderSection1 = () => {
     return (
-      <div>
-        {/* {
-          hotelPhotos.map(photos =>(
-            <div key={photos['0']}>
-              <p>
-                <Image
-                  src={photos['5']}
-                  width={200}
-                  height={200}
-                  alt="hotel photo"
-                />
-              </p>
-            </div>
-          ))
-        } */}
+      <div className="listingSection__wrap !space-y-6">
+        {/* 1 */}
+        <div className="flex justify-between items-center">
+          <Badge name="Wooden house" />
+          <LikeSaveBtns />
+        </div>
+
+        {/* 2 */}
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
+          {hotelDetail && hotelDetail.hotel_name}
+        </h2>
+
+        {/* 3 */}
+        <div className="flex items-center space-x-4">
+          <StartRating />
+          <span>·</span>
+          <span>
+            <i className="las la-map-marker-alt"></i>
+            <span className="ml-1">
+              {hotelDetail && hotelDetail.country_trans},{" "}
+              {hotelDetail && hotelDetail.city_trans}
+            </span>
+          </span>
+        </div>
+
+        {/* 4 */}
+        <div className="flex items-center">
+          <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" />
+          <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
+            Hosted by{" "}
+            <span className="text-neutral-900 dark:text-neutral-200 font-medium">
+              Kevin Francis
+            </span>
+          </span>
+        </div>
+
+        {/* 5 */}
+        <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
+
+        {/* 6 */}
+        <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
+          <div className="flex items-center space-x-3 ">
+            <i className=" las la-user text-2xl "></i>
+            <span className="">
+              6 <span className="hidden sm:inline-block">guests</span>
+            </span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <i className=" las la-bed text-2xl"></i>
+            <span className=" ">
+              6 <span className="hidden sm:inline-block">beds</span>
+            </span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <i className=" las la-bath text-2xl"></i>
+            <span className=" ">
+              3 <span className="hidden sm:inline-block">baths</span>
+            </span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <i className=" las la-door-open text-2xl"></i>
+            <span className=" ">
+              2 <span className="hidden sm:inline-block">bedrooms</span>
+            </span>
+          </div>
+        </div>
       </div>
-      // <div className="listingSection__wrap !space-y-6">
-      //   {/* 1 */}
-      //   <div className="flex justify-between items-center">
-      //     <Badge name="Wooden house" />
-      //     <LikeSaveBtns />
-      //   </div>
-
-      //   {/* 2 */}
-      //   <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
-      //     Beach House in Collingwood
-      //   </h2>
-
-      //   {/* 3 */}
-      //   <div className="flex items-center space-x-4">
-      //     <StartRating />
-      //     <span>·</span>
-      //     <span>
-      //       <i className="las la-map-marker-alt"></i>
-      //       <span className="ml-1"> Tokyo, Jappan</span>
-      //     </span>
-      //   </div>
-
-      //   {/* 4 */}
-      //   <div className="flex items-center">
-      //     <Avatar hasChecked sizeClass="h-10 w-10" radius="rounded-full" />
-      //     <span className="ml-2.5 text-neutral-500 dark:text-neutral-400">
-      //       Hosted by{" "}
-      //       <span className="text-neutral-900 dark:text-neutral-200 font-medium">
-      //         Kevin Francis
-      //       </span>
-      //     </span>
-      //   </div>
-
-      //   {/* 5 */}
-      //   <div className="w-full border-b border-neutral-100 dark:border-neutral-700" />
-
-      //   {/* 6 */}
-      //   <div className="flex items-center justify-between xl:justify-start space-x-8 xl:space-x-12 text-sm text-neutral-700 dark:text-neutral-300">
-      //     <div className="flex items-center space-x-3 ">
-      //       <i className=" las la-user text-2xl "></i>
-      //       <span className="">
-      //         6 <span className="hidden sm:inline-block">guests</span>
-      //       </span>
-      //     </div>
-      //     <div className="flex items-center space-x-3">
-      //       <i className=" las la-bed text-2xl"></i>
-      //       <span className=" ">
-      //         6 <span className="hidden sm:inline-block">beds</span>
-      //       </span>
-      //     </div>
-      //     <div className="flex items-center space-x-3">
-      //       <i className=" las la-bath text-2xl"></i>
-      //       <span className=" ">
-      //         3 <span className="hidden sm:inline-block">baths</span>
-      //       </span>
-      //     </div>
-      //     <div className="flex items-center space-x-3">
-      //       <i className=" las la-door-open text-2xl"></i>
-      //       <span className=" ">
-      //         2 <span className="hidden sm:inline-block">bedrooms</span>
-      //       </span>
-      //     </div>
-      //   </div>
-      // </div>
     );
   };
 
@@ -167,23 +205,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         <h2 className="text-2xl font-semibold">Stay information</h2>
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
         <div className="text-neutral-6000 dark:text-neutral-300">
-          <span>
-            Providing lake views, The Symphony 9 Tam Coc in Ninh Binh provides
-            accommodation, an outdoor swimming pool, a bar, a shared lounge, a
-            garden and barbecue facilities. Complimentary WiFi is provided.
-          </span>
-          <br />
-          <br />
-          <span>
-            There is a private bathroom with bidet in all units, along with a
-            hairdryer and free toiletries.
-          </span>
-          <br /> <br />
-          <span>
-            The Symphony 9 Tam Coc offers a terrace. Both a bicycle rental
-            service and a car rental service are available at the accommodation,
-            while cycling can be enjoyed nearby.
-          </span>
+          {description && description}
         </div>
       </div>
     );
@@ -201,12 +223,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
         {/* 6 */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 text-sm text-neutral-700 dark:text-neutral-300 ">
-          {Amenities_demos.filter((_, i) => i < 12).map((item) => (
-            <div key={item.name} className="flex items-center space-x-3">
-              <i className={`text-3xl las ${item.icon}`}></i>
-              <span className=" ">{item.name}</span>
-            </div>
-          ))}
+          {hotelFacilities &&
+            hotelFacilities.map((item) => (
+              <div key={item.id} className="flex items-center space-x-3">
+                {/* <i className={`text-3xl las ${item.icon}`}></i> */}
+                <span className=" ">{item.name}</span>
+              </div>
+            ))}
         </div>
 
         {/* ----- */}
@@ -559,6 +582,47 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
     );
   };
 
+  const handleReserve = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    const baseUrl = "https://utotel.herokuapp.com/v1";
+    const authRegBody = {
+      email: "bkiragu27@gmail.com",
+      password: "12345678",
+      method: "custom_email",
+    };
+
+    // Get auth token
+    const res = await axios.post(`${baseUrl}/auth/login`, authRegBody);
+    console.log("login res", res.data);
+
+    // add booking
+    const reservebody = {
+      userId: "64518774c0d82e4ec1edfdf8", // res.data.data.user_id,
+      roomId: "64518f0ba1df27c295b0db6c",
+      wishlistId: "64518f3ea1df27c295b0db76",
+      checkInDate: "2023-05-10T00:00:00Z",
+      checkOutDate: "2023-06-15T00:00:00Z",
+      paymentAmount: 500,
+      paymentMethod: "credit_card",
+      paymentCurrency: "USD",
+      paymentStatus: "paid",
+    };
+
+    const reserveRes = await axios.post(
+      `${baseUrl}/user/add_booking`,
+      reservebody,
+      {
+        headers: {
+          Authorization: `Bearer ${res.data.data.token}`,
+        },
+      }
+    );
+    console.log("Added booking res", reserveRes.data);
+
+    // make payment
+  };
+
   const renderSidebar = () => {
     return (
       <div className="listingSectionSidebar__wrap shadow-xl">
@@ -598,7 +662,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         </div>
 
         {/* SUBMIT */}
-        <ButtonPrimary href={"/checkout"}>Reserve</ButtonPrimary>
+        <ButtonPrimary href={"/checkout"} onClick={handleReserve}>
+          Reserve
+        </ButtonPrimary>
       </div>
     );
   };

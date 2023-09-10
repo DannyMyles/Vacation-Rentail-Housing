@@ -1,5 +1,5 @@
 import { ListingGalleryImage } from "@/components/listing-image-gallery/utils/types";
-import { HotelDetails } from "@/data/types";
+import { HotelPhotos } from "@/data/types";
 import axios from "axios";
 
 export const PHOTOS: string[] = [
@@ -86,7 +86,7 @@ export async function gethotelPhotos(
       "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
     },
   };
-  const response = await axios.request<HotelDetails>(options);
+  const response = await axios.request<HotelPhotos>(options);
   // return response.data.data[`${hotel_id}`];
 
   // looping thru the images to add the url prefix
