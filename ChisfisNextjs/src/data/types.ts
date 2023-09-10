@@ -142,7 +142,6 @@ export interface CarDataType {
   };
 }
 
-
 export interface PropertyList {
   arrival_date: string;
   departure_date: string;
@@ -162,18 +161,41 @@ export interface PropertyList {
 export interface CardDataType {
   id: string;
   main_photo_url: string;
-  hotel_name:string;
-  address:string;
-  review_score:number;
-  review_nr:number;
-  main_total_price:number;
+  hotel_name: string;
+  address: string;
+  review_score: number;
+  review_nr: number;
+  main_total_price: number;
 }
 
-export interface HotelDetails {
+export interface HotelPhotos {
   data: {
-    [key : string]: HomepageDetails[];
+    [key: string]: HomepageDetails[];
+  };
+}
+export interface HotelDetails {
+  data: HotelDetail;
+}
+
+export interface HotelDetail {
+  hotel_name: string;
+  address: string;
+  description: string;
+  country_trans: string;
+  city_trans: string;
+  rooms: {
+    [k: string]: any,
   }
 }
+
+export interface Facility {
+    alt_facilitytype_name: string;
+    name: string;
+    facilitytype_id: number;
+    id: number;
+    alt_facilitytype_id: number;
+    facilitytype_name: string;
+  };
 
 export interface HomepageDetails {
   "0": number;
@@ -184,13 +206,10 @@ export interface HomepageDetails {
     tag_name: null | string;
     tag_type: string;
   }[];
-  "2": number
-  "3":{tag: String, id: number}[];
+  "2": number;
+  "3": { tag: String; id: number }[];
   "4": string;
   "5": string;
   "6": string;
   "7": string;
 }
-
-
-

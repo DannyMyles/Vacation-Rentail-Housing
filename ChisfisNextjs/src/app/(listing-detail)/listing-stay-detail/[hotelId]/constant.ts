@@ -1,4 +1,6 @@
 import { ListingGalleryImage } from "@/components/listing-image-gallery/utils/types";
+import { HotelPhotos } from "@/data/types";
+import axios from "axios";
 
 export const PHOTOS: string[] = [
   "https://images.pexels.com/photos/6129967/pexels-photo-6129967.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260",
@@ -69,3 +71,27 @@ export const imageGallery: ListingGalleryImage[] = [...PHOTOS].map(
     };
   }
 );
+
+export async function gethotelPhotos(
+  hotel_id: number
+): Promise<ListingGalleryImage[]> {
+  const options = {
+    method: "GET",
+    url: "https://apidojo-booking-v1.p.rapidapi.com/properties/get-hotel-photos",
+    params: {
+      hotel_ids: hotel_id,
+    },
+    headers: {
+      "X-RapidAPI-Key": "bed8d8672fmshba4b60b4b95db60p1cf23djsnf009a4d70736",
+      "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
+    },
+  };
+  const response = await axios.request<HotelPhotos>(options);
+  // return response.data.data[`${hotel_id}`];
+
+  // looping thru the images to add the url prefix
+  return response.data.data[`${hotel_id}`].map((p, index) => ({
+    id: index,
+    url: `https://cf.bstatic.com${p["5"]}`,
+  }));
+}
