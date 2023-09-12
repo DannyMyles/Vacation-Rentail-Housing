@@ -9,9 +9,13 @@ import { GuestsObject } from "@/app/(client-components)/type";
 
 export interface GuestsInputProps {
   className?: string;
+  onGuestsInputChange: (guests: any) => void;
 }
 
-const GuestsInput: FC<GuestsInputProps> = ({ className = "flex-1" }) => {
+const GuestsInput: FC<GuestsInputProps> = ({
+  className = "flex-1",
+  onGuestsInputChange,
+}) => {
   const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(2);
   const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(1);
   const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(1);
@@ -22,18 +26,30 @@ const GuestsInput: FC<GuestsInputProps> = ({ className = "flex-1" }) => {
       guestChildren: guestChildrenInputValue,
       guestInfants: guestInfantsInputValue,
     };
+
+    const persons = {
+      guestAdults: guestAdultsInputValue,
+      guestChildren: guestChildrenInputValue,
+      guestInfants: guestInfantsInputValue,
+    };
+
     if (type === "guestAdults") {
       setGuestAdultsInputValue(value);
       newValue.guestAdults = value;
+      persons.guestAdults = value;
     }
     if (type === "guestChildren") {
       setGuestChildrenInputValue(value);
       newValue.guestChildren = value;
+      persons.guestChildren = value;
     }
     if (type === "guestInfants") {
       setGuestInfantsInputValue(value);
       newValue.guestInfants = value;
+      persons.guestInfants = value;
     }
+
+    onGuestsInputChange(persons);
   };
 
   const totalGuests =

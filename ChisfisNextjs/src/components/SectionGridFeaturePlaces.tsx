@@ -62,7 +62,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
         },
         headers: {
           "X-RapidAPI-Key":
-            "5b1750abd1msha9b6ba43a9d5ed2p12802cjsn324d1231e608",
+            "0061e11d34msh2f28be45847ca1dp109dd6jsn9ba86093461a",
           "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
         },
       };
