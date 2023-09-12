@@ -39,6 +39,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
   const [hotelDetail, setHotelDetail] = useState<HotelDetail>();
   const [hotelFacilities, setHotelFacilities] = useState<Facility[]>();
   const [description, setDescription] = useState<string>();
+  const [amountPerNight, setAmountPerNight] = useState<number>();
+  const [dates, setDates] = useState<{ startDate: Date; endDate: Date }>();
+  const [guests, setGuests] = useState<{
+    guestAdults: number;
+    guestChildren: number;
+    guestInfants: number;
+  }>();
+  const [numberOfNights, setNumberOfNights] = useState<number>();
 
   async function gethotelPhotos() {
     const options = {
@@ -48,7 +56,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         hotel_ids: `${params.hotelId}`,
       },
       headers: {
-        "X-RapidAPI-Key": "5b1750abd1msha9b6ba43a9d5ed2p12802cjsn324d1231e608",
+        "X-RapidAPI-Key": "0061e11d34msh2f28be45847ca1dp109dd6jsn9ba86093461a",
         "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
       },
     };
@@ -100,7 +108,7 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         rec_room_qty: 1,
       },
       headers: {
-        "X-RapidAPI-Key": "5b1750abd1msha9b6ba43a9d5ed2p12802cjsn324d1231e608",
+        "X-RapidAPI-Key": "0061e11d34msh2f28be45847ca1dp109dd6jsn9ba86093461a",
         "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
       },
     };
@@ -120,7 +128,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
       setHotelFacilities(
         response.data[0]["rooms"][key]["facilities"] as Facility[]
       );
+
       setDescription(response.data[0]["rooms"][key]["description"] as string);
+
+      setAmountPerNight(
+        response.data[0]["composite_price_breakdown"]["gross_amount_per_night"][
+          "value"
+        ]
+      );
 
       console.log("getDetails", response.data[0], hotelFacilities);
     } catch (error) {
@@ -582,45 +597,75 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
     );
   };
 
+  const handleGuestsChange = (guests: any) => {
+    setGuests(guests);
+  };
+
+  const handleDateSelectionChange = (startDate: Date, endDate: Date) => {
+    setDates({ startDate, endDate });
+
+    setNumberOfNights(
+      (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+        (24 * 60 * 60 * 1000)
+    );
+
+    console.log(
+      "dates ",
+      startDate,
+      "new Date(startDate)",
+      new Date(startDate).getTime(),
+      "endDate ",
+      endDate,
+      new Date(endDate).getTime(),
+      "difference ",
+      new Date(endDate).getTime() - new Date(startDate).getTime()
+    );
+    // console.log("number of nights ", numberOfNights);
+  };
+
   const handleReserve = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    const baseUrl = "https://utotel.herokuapp.com/v1";
-    const authRegBody = {
-      email: "bkiragu27@gmail.com",
-      password: "12345678",
-      method: "custom_email",
-    };
+    // const baseUrl = "https://utotel.herokuapp.com/v1";
+    // const authRegBody = {
+    //   email: "bkiragu27@gmail.com",
+    //   password: "12345678",
+    //   method: "custom_email",
+    // };
 
-    // Get auth token
-    const res = await axios.post(`${baseUrl}/auth/login`, authRegBody);
-    console.log("login res", res.data);
+    // // Get auth token
+    // const res = await axios.post(`${baseUrl}/auth/login`, authRegBody);
+    // console.log("login res", res.data);
 
-    // add booking
-    const reservebody = {
-      userId: "64518774c0d82e4ec1edfdf8", // res.data.data.user_id,
-      roomId: "64518f0ba1df27c295b0db6c",
-      wishlistId: "64518f3ea1df27c295b0db76",
-      checkInDate: "2023-05-10T00:00:00Z",
-      checkOutDate: "2023-06-15T00:00:00Z",
-      paymentAmount: 500,
-      paymentMethod: "credit_card",
-      paymentCurrency: "USD",
-      paymentStatus: "paid",
-    };
+    // // add booking
+    // const reservebody = {
+    //   userId: "64518774c0d82e4ec1edfdf8", // res.data.data.user_id,
+    //   roomId: "64518f0ba1df27c295b0db6c",
+    //   wishlistId: "64518f3ea1df27c295b0db76",
+    //   checkInDate: "2023-05-10T00:00:00Z",
+    //   checkOutDate: "2023-06-15T00:00:00Z",
+    //   paymentAmount: 500,
+    //   paymentMethod: "credit_card",
+    //   paymentCurrency: "USD",
+    //   paymentStatus: "paid",
+    // };
 
-    const reserveRes = await axios.post(
-      `${baseUrl}/user/add_booking`,
-      reservebody,
-      {
-        headers: {
-          Authorization: `Bearer ${res.data.data.token}`,
-        },
-      }
+    // const reserveRes = await axios.post(
+    //   `${baseUrl}/user/add_booking`,
+    //   reservebody,
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${res.data.data.token}`,
+    //     },
+    //   }
+    // );
+    // console.log("Added booking res", reserveRes.data);
+
+    // redirect to checkout page
+    console.log("dates to be passed", dates, " guetss ", guests);
+    router.push(
+      `/checkout?checkIn=${dates?.startDate}&checkOut=${dates?.endDate}&guestChildren=${guests?.guestChildren}&guestAdults=${guests?.guestAdults}&guestInfants=${guests?.guestInfants}&amount=${amountPerNight}`
     );
-    console.log("Added booking res", reserveRes.data);
-
-    // make payment
   };
 
   const renderSidebar = () => {
@@ -629,9 +674,9 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         {/* PRICE */}
         <div className="flex justify-between">
           <span className="text-3xl font-semibold">
-            $119
+            ${amountPerNight && amountPerNight.toFixed()}
             <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-              /night
+              /night {numberOfNights}
             </span>
           </span>
           <StartRating />
@@ -639,16 +684,24 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
 
         {/* FORM */}
         <form className="flex flex-col border border-neutral-200 dark:border-neutral-700 rounded-3xl ">
-          <StayDatesRangeInput className="flex-1 z-[11]" />
+          <StayDatesRangeInput
+            className="flex-1 z-[11]"
+            onDateSelectionChange={handleDateSelectionChange}
+          />
           <div className="w-full border-b border-neutral-200 dark:border-neutral-700"></div>
-          <GuestsInput className="flex-1" />
+          <GuestsInput
+            className="flex-1"
+            onGuestsInputChange={handleGuestsChange}
+          />
         </form>
 
         {/* SUM */}
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
-            <span>$119 x 3 night</span>
-            <span>$357</span>
+            <span>
+              ${amountPerNight?.toFixed()} x {numberOfNights} night(s)
+            </span>
+            <span>${amountPerNight && amountPerNight * numberOfNights}</span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>Service charge</span>
@@ -657,7 +710,14 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
           <div className="flex justify-between font-semibold">
             <span>Total</span>
-            <span>$199</span>
+            <span>
+              {guests &&
+                amountPerNight &&
+                (guests.guestAdults +
+                  guests.guestChildren +
+                  guests.guestInfants) *
+                  (amountPerNight * numberOfNights)}
+            </span>
           </div>
         </div>
 

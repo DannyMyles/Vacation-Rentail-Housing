@@ -2,7 +2,7 @@
 
 import { Tab } from "@headlessui/react";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import React, { FC, Fragment, useState } from "react";
+import React, { FC, Fragment, useState, MouseEvent } from "react";
 import visaPng from "@/images/vis.png";
 import mastercardPng from "@/images/mastercard.svg";
 import Input from "@/shared/Input";
@@ -16,6 +16,9 @@ import converSelectedDateToString from "@/utils/converSelectedDateToString";
 import ModalSelectGuests from "@/components/ModalSelectGuests";
 import Image from "next/image";
 import { GuestsObject } from "../(client-components)/type";
+import axios from "axios";
+import { usePathname, useSearchParams } from "next/navigation";
+import { join } from "path";
 
 export interface CheckOutPagePageMainProps {
   className?: string;
@@ -24,16 +27,90 @@ export interface CheckOutPagePageMainProps {
 const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   className = "",
 }) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  console.log("guests params ", searchParams.get("guests"));
   const [startDate, setStartDate] = useState<Date | null>(
-    new Date("2023/02/06")
+    new Date(searchParams.get("checkIn") as string)
   );
-  const [endDate, setEndDate] = useState<Date | null>(new Date("2023/02/23"));
+  const [endDate, setEndDate] = useState<Date | null>(
+    new Date(searchParams.get("checkOut") as string)
+  );
 
   const [guests, setGuests] = useState<GuestsObject>({
-    guestAdults: 2,
-    guestChildren: 1,
-    guestInfants: 1,
+    guestAdults: parseInt(searchParams.get("guestAdults") as string),
+    guestChildren: parseInt(searchParams.get("guestChildren") as string),
+    guestInfants: parseInt(searchParams.get("guestInfants") as string),
   });
+
+  const [amountPerNight, setAmountPerNight] = useState(
+    parseInt(searchParams.get("amount") as string)
+  );
+  console.log("amountPerNight", amountPerNight);
+
+  const [numberOfNights, setNumberOfNights] = useState(
+    (new Date(searchParams.get("checkOut") as string).getTime() -
+      new Date(searchParams.get("checkIn") as string).getTime()) /
+      (24 * 60 * 60 * 1000)
+  );
+
+  console.log(
+    "guests",
+    parseInt(searchParams.get("guestAdults") as string),
+    parseInt(searchParams.get("guestChildren") as string),
+    parseInt(searchParams.get("guestInfants") as string)
+  );
+  // payment inputs
+  const [paymentValues, setpaymentValues] = useState({
+    cardNo: "",
+    email: "",
+  });
+
+  const paymentAmount =
+    guests.guestAdults && guests.guestChildren && guests.guestInfants
+      ? (guests?.guestAdults + guests?.guestChildren + guests?.guestInfants) *
+        (amountPerNight * numberOfNights)
+      : 0;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setpaymentValues({ ...paymentValues, [name]: value });
+  };
+  const handlePayment = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    const baseUrl = "https://utotel.herokuapp.com/v1";
+    const authRegBody = {
+      email: "bkiragu27@gmail.com",
+      password: "12345678",
+      method: "custom_email",
+    };
+
+    // Get auth token
+    const res = await axios.post(`${baseUrl}/auth/login`, authRegBody);
+    console.log("login res", res.data);
+
+    // make payment
+    const paymentbody = {
+      amount: paymentAmount,
+      paymentMethod: "pm_card_visa",
+      booking_id: "645340459541754e8810516a",
+      userId: "cus_OT9quJQQO8lCis",
+      email: paymentValues.email,
+    };
+
+    const paymentRes = await axios.post(
+      `${baseUrl}/payment/create-payment-intent`,
+      paymentbody,
+      {
+        headers: {
+          Authorization: `Bearer ${res.data.data.token}`,
+        },
+      }
+    );
+    // will not go to production
+    alert(JSON.stringify(paymentRes, null, 4));
+  };
 
   const renderSidebar = () => {
     return (
@@ -68,8 +145,10 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         <div className="flex flex-col space-y-4">
           <h3 className="text-2xl font-semibold">Price detail</h3>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
-            <span>$19 x 3 day</span>
-            <span>$57</span>
+            <span>
+              ${amountPerNight?.toFixed()} x {numberOfNights} night(s)
+            </span>
+            <span>{amountPerNight && amountPerNight * numberOfNights}</span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>Service charge</span>
@@ -79,7 +158,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
           <div className="border-b border-neutral-200 dark:border-neutral-700"></div>
           <div className="flex justify-between font-semibold">
             <span>Total</span>
-            <span>$57</span>
+            <span>${paymentAmount}</span>
           </div>
         </div>
       </div>
@@ -198,7 +277,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                 <Tab.Panel className="space-y-5">
                   <div className="space-y-1">
                     <Label>Card number </Label>
-                    <Input defaultValue="111 112 222 999" />
+                    <Input />
                   </div>
                   <div className="space-y-1">
                     <Label>Card holder </Label>
@@ -225,7 +304,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                 <Tab.Panel className="space-y-5">
                   <div className="space-y-1">
                     <Label>Email </Label>
-                    <Input type="email" defaultValue="example@gmail.com" />
+                    <Input type="email" onChange={handleChange} name="email" />
                   </div>
                   <div className="space-y-1">
                     <Label>Password </Label>
@@ -242,7 +321,9 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
               </Tab.Panels>
             </Tab.Group>
             <div className="pt-8">
-              <ButtonPrimary href={"/pay-done"}>Confirm and pay</ButtonPrimary>
+              <ButtonPrimary href={"/pay-done"} onClick={handlePayment}>
+                Confirm and pay
+              </ButtonPrimary>
             </div>
           </div>
         </div>
