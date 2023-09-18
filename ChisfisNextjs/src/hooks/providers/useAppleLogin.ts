@@ -1,11 +1,13 @@
 import { OAuthProvider, signInWithPopup } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { useToast } from "../useToast";
+// import { useRouter } from "next/router";
 import { app, getAuth } from "config/firebase";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 
 export const useAppleLogin = () => {
-  const router = useRouter();
+  const { sendSuccessToast, sendErrorToast, toast: appleToast } = useToast();
+  // const router = useRouter();
   const authWithApple = async () => {
     const auth = getAuth(app);
     const provider = new OAuthProvider("apple.com");
@@ -25,7 +27,7 @@ export const useAppleLogin = () => {
       );
       return response.data;
     } catch (err: any) {
-      console.log(err.response.data.data.error);
+      sendErrorToast("Error!", err.response.data.data.error);
     }
   };
   const { mutate: appleLogin, isLoading } = useMutation({
@@ -35,7 +37,7 @@ export const useAppleLogin = () => {
       localStorage.setItem("user_id", data.data.id);
       localStorage.setItem("user_info", JSON.stringify(data.data));
 
-      console.log(data.data);
+      sendSuccessToast("Success!", "Logged in successfully!");
       setTimeout(() => {
         router.push("/");
       }, 500);
@@ -44,5 +46,6 @@ export const useAppleLogin = () => {
   return {
     appleLogin,
     isLoading,
+    appleToast,
   };
 };
