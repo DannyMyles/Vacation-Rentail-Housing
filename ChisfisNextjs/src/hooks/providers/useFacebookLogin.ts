@@ -1,11 +1,13 @@
 import axios from "axios";
 import { app, getAuth, signInWithPopup } from "config/firebase";
+import { useToast } from "../useToast";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/router";
 import { FacebookAuthProvider } from "firebase/auth";
 
 export const useFacebookLogin = () => {
-  const router = useRouter();
+  const { sendSuccessToast, sendErrorToast, toast: facebookToast } = useToast();
+  // const router = useRouter();
   const authWithFacebook = async () => {
     const auth = getAuth(app);
     const provider = new FacebookAuthProvider();
@@ -26,7 +28,7 @@ export const useFacebookLogin = () => {
       );
       return response.data;
     } catch (error: any) {
-      console.log(error.response.data.data.error);
+      sendErrorToast("Error!", error.response.data.data.error);
     }
   };
 
@@ -35,11 +37,11 @@ export const useFacebookLogin = () => {
     onSuccess: (data) => {
       localStorage.setItem("auth-token", data.data.token);
       localStorage.setItem("user_id", data.data.id);
-      localStorage.setItem("user_info", JSON.stringify(data.data));
+      localStorage.setItem("user_info", JSON.stringify(data.data))
 
-      console.log(data.data);
+      sendSuccessToast("Success!", "Logged in successfully!");
       setTimeout(() => {
-        router.push("/");
+        // router.push("/");
       }, 500);
     },
   });
@@ -47,5 +49,6 @@ export const useFacebookLogin = () => {
   return {
     facebookLogin,
     isLoading,
+    facebookToast,
   };
 };

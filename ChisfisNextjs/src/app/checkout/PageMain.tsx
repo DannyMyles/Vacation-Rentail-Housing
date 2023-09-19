@@ -2,7 +2,7 @@
 
 import { Tab } from "@headlessui/react";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import React, { FC, Fragment, useState, MouseEvent } from "react";
+import React, { FC, Fragment, useState, MouseEvent, useEffect } from "react";
 import visaPng from "@/images/vis.png";
 import mastercardPng from "@/images/mastercard.svg";
 import Input from "@/shared/Input";
@@ -16,10 +16,8 @@ import converSelectedDateToString from "@/utils/converSelectedDateToString";
 import ModalSelectGuests from "@/components/ModalSelectGuests";
 import Image from "next/image";
 import { GuestsObject } from "../(client-components)/type";
-import axios from "axios";
 import { usePathname, useSearchParams } from "next/navigation";
-import { join } from "path";
-
+import axios from "axios";
 export interface CheckOutPagePageMainProps {
   className?: string;
 }
@@ -27,6 +25,25 @@ export interface CheckOutPagePageMainProps {
 const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   className = "",
 }) => {
+  const getCardToken = async (
+    cardNumber: string,
+    expMonth: number,
+    expYear: number,
+    cvc: string
+  ) => {
+    const stripe = require("stripe")("sk_test_4eC39HqLyjWDarjtT1zdp7dc");
+
+    const token = await stripe.tokens.create({
+      card: {
+        number: "4242424242424242", //cardNumber, //"4242424242424242",
+        exp_month: 9, //expMonth, //9,
+        exp_year: 2024, //expYear, //2024,
+        cvc: 314, //cvc, //"314",
+      },
+    });
+    return token;
+  };
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   console.log("guests params ", searchParams.get("guests"));
@@ -54,16 +71,15 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
       (24 * 60 * 60 * 1000)
   );
 
-  console.log(
-    "guests",
-    parseInt(searchParams.get("guestAdults") as string),
-    parseInt(searchParams.get("guestChildren") as string),
-    parseInt(searchParams.get("guestInfants") as string)
-  );
   // payment inputs
   const [paymentValues, setpaymentValues] = useState({
-    cardNo: "",
+    cardNumber: "",
     email: "",
+    cardHolder: "",
+    expiryDate: new Date(),
+    cardCvc: "",
+    message: "",
+    password: "",
   });
 
   const paymentAmount =
@@ -79,10 +95,13 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
   const handlePayment = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
+    const expMonth = new Date(paymentValues.expiryDate).getMonth();
+    const expYear = new Date(paymentValues.expiryDate).getFullYear();
+    console.log("tokenize payment", paymentValues);
     const baseUrl = "https://utotel.herokuapp.com/v1";
     const authRegBody = {
-      email: "bkiragu27@gmail.com",
-      password: "12345678",
+      email: "bkiragu27@gmail.com", //paymentValues.email, //"bkiragu27@gmail.com",
+      password: "12345678", // paymentValues.password, //"12345678",
       method: "custom_email",
     };
 
@@ -90,13 +109,23 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
     const res = await axios.post(`${baseUrl}/auth/login`, authRegBody);
     console.log("login res", res.data);
 
+    // create payment
+    const token = await getCardToken(
+      paymentValues.cardNumber,
+      expMonth,
+      expYear,
+      paymentValues.cardCvc
+    );
+
+    console.log("card token", token);
+
     // make payment
     const paymentbody = {
       amount: paymentAmount,
-      paymentMethod: "pm_card_visa",
+      paymentMethod: token.id,
       booking_id: "645340459541754e8810516a",
       userId: "cus_OT9quJQQO8lCis",
-      email: paymentValues.email,
+      email: "bkiragu27@gmail.com",
     };
 
     const paymentRes = await axios.post(
@@ -108,6 +137,7 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
         },
       }
     );
+
     // will not go to production
     alert(JSON.stringify(paymentRes, null, 4));
   };
@@ -277,25 +307,42 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                 <Tab.Panel className="space-y-5">
                   <div className="space-y-1">
                     <Label>Card number </Label>
-                    <Input />
+                    <Input
+                      onChange={handleChange}
+                      name="cardNumber"
+                      defaultValue="235-4643-565"
+                    />
                   </div>
                   <div className="space-y-1">
                     <Label>Card holder </Label>
-                    <Input defaultValue="JOHN DOE" />
+                    <Input
+                      defaultValue="JOHN DOE"
+                      onChange={handleChange}
+                      name="cardHolder"
+                    />
                   </div>
                   <div className="flex space-x-5  ">
                     <div className="flex-1 space-y-1">
                       <Label>Expiration date </Label>
-                      <Input type="date" defaultValue="MM/YY" />
+                      <Input
+                        type="date"
+                        defaultValue="MM/YY"
+                        onChange={handleChange}
+                        name="expiryDate"
+                      />
                     </div>
                     <div className="flex-1 space-y-1">
                       <Label>CVC </Label>
-                      <Input />
+                      <Input onChange={handleChange} name="cardCvc" />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <Label>Messager for author </Label>
-                    <Textarea placeholder="..." />
+                    <Textarea
+                      placeholder="..."
+                      onChange={handleChange}
+                      name="message"
+                    />
                     <span className="text-sm text-neutral-500 block">
                       Write a few sentences about yourself.
                     </span>
@@ -308,7 +355,12 @@ const CheckOutPagePageMain: FC<CheckOutPagePageMainProps> = ({
                   </div>
                   <div className="space-y-1">
                     <Label>Password </Label>
-                    <Input type="password" defaultValue="***" />
+                    <Input
+                      type="password"
+                      defaultValue="***"
+                      onChange={handleChange}
+                      name="password"
+                    />
                   </div>
                   <div className="space-y-1">
                     <Label>Messager for author </Label>

@@ -699,9 +699,11 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>
-              ${amountPerNight?.toFixed()} x {numberOfNights} night(s)
+              ${amountPerNight?.toFixed()} x {numberOfNights || 0} night(s)
             </span>
-            <span>${amountPerNight && amountPerNight * numberOfNights}</span>
+            <span>
+              ${(amountPerNight && amountPerNight * numberOfNights) || 0}
+            </span>
           </div>
           <div className="flex justify-between text-neutral-6000 dark:text-neutral-300">
             <span>Service charge</span>
@@ -711,12 +713,13 @@ const ListingStayDetailPage: FC<ListingStayDetailPageProps> = ({ params }) => {
           <div className="flex justify-between font-semibold">
             <span>Total</span>
             <span>
-              {guests &&
+              {(guests &&
                 amountPerNight &&
                 (guests.guestAdults +
                   guests.guestChildren +
                   guests.guestInfants) *
-                  (amountPerNight * numberOfNights)}
+                  (amountPerNight * numberOfNights)) ||
+                0}
             </span>
           </div>
         </div>

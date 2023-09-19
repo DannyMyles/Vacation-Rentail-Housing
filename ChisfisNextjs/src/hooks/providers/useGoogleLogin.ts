@@ -5,11 +5,13 @@ import {
   getAuth,
   signInWithPopup,
 } from "config/firebase";
+import { useToast } from "../useToast";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/router";
 
 export const useGoogleLogin = () => {
-  const router = useRouter();
+  const { sendSuccessToast, sendErrorToast, toast: googleToast } = useToast();
+  // const router = useRouter();
   const authWithGoogle = async () => {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
@@ -30,7 +32,7 @@ export const useGoogleLogin = () => {
       );
       return response.data;
     } catch (error: any) {
-      console.log(error.response.data.data.error);
+      sendErrorToast("Error!", error.response.data.data.error);
     }
   };
 
@@ -41,8 +43,9 @@ export const useGoogleLogin = () => {
       localStorage.setItem("user_id", data.data.id);
       localStorage.setItem("user_info", JSON.stringify(data.data));
 
+      sendSuccessToast("Success!", "Logged in successfully!");
       setTimeout(() => {
-        router.push("/");
+        // router.push("/");
       }, 500);
     },
   });
@@ -50,5 +53,6 @@ export const useGoogleLogin = () => {
   return {
     googleLogin,
     isLoading,
+    googleToast,
   };
 };

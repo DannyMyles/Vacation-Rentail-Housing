@@ -1,0 +1,87 @@
+.box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+  }
+  
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding:56px;
+    
+  
+    isolation: isolate;
+  
+    margin-top: 0;
+  
+    /* Base/White */
+  
+    background: #ffffff;
+    border-radius: 24px;
+  }
+  
+  .lefttext1 {
+    /* Headline xL/Desktop/Semibold */
+  
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 48px;
+    /* or 120% */
+  
+    letter-spacing: -0.02em;
+  
+    /* Base/White */
+  
+    color: #272d37;
+  }
+  .lefttext2 {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 26px;
+    margin-top: 10px;
+    /* or 144% */
+  
+    letter-spacing: -0.1px;
+  
+    /* Neutral/25 */
+  
+    color: #272d37;
+  }
+  
+  .apple {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  
+    /* Base/Black */
+  }
+  
+  .google {
+    box-sizing: border-box;
+  
+    /* Auto layout */
+  
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  
+  .left{
+      margin-top: 10rem;
+  }
