@@ -38,7 +38,7 @@ This is a hotel booking website that allows our potential users to book hotels, 
 - You will not disclose any information about this project.
 - If you choose to ignore the above guidelines and engage in actions that mislead, harm, or disrupt the project, we reserve the right to take appropriate actions.
 
-[MIT](https://github.com/chaejimmy/ideal-guide/blob/main/LICENSE)
+[MIT](https://github.com/DannyMyles/Vacation-Rentail-Housing.git/blob/main/LICENSE)
 
 ## Contributing (only invited)
 
